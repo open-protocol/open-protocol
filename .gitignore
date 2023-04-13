@@ -1,0 +1,32 @@
+# vs code
+.DS_Store
+
+# jetbrain
+.idea
+
+# node.js
+dist
+node_modules
+package-lock.json
+
+# rocksdb
+db
+
+# opp node
+contract-*
+peerkey-*
+key-*
+signature-*
+transaction-*
+
+# log
+logs
+
+# env
+.env
+
+# wasm
+*.wasm
+*.wat
+target
+*.lock
