@@ -1,5 +1,5 @@
 import { Keypair } from '.'
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 import { UnsignedTransaction } from '../types'
 
 test('keypair sign and verify test', async () => {

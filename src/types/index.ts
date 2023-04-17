@@ -1,4 +1,4 @@
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 import crypto from 'crypto'
 import { Keypair } from '../keypair'
 
@@ -109,7 +109,7 @@ export class SignedTransaction implements ISignedTransaction {
 }
 
 export type MemoryKey = string | number | bigint
-export type MemoryValue = string | number | bigint | object
+export type MemoryValue = string | number | bigint | MemoryValue[] | Map<MemoryKey, MemoryValue>
 
 interface IAccount {
   publicKey: string

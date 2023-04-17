@@ -1,5 +1,4 @@
-import { Codec } from '../codec'
-import { logger } from '../logger'
+import { Codec } from '@open-protocol/codec'
 import { NetworkTask } from '../network'
 import { RpcTask } from '../rpc'
 import { ITask, TaskManager } from '../task'

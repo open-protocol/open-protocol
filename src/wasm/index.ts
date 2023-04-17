@@ -1,4 +1,4 @@
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 import { RpcTask } from '../rpc'
 import { StateTask } from '../state'
 import { ITask, TaskManager } from '../task'

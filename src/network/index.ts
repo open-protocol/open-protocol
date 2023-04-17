@@ -10,7 +10,7 @@ import { PeerId } from '@libp2p/interface-peer-id'
 import { TxPoolTask } from '../txpool'
 import { SignedTransaction } from '../types'
 import { logger } from '../logger'
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 
 export class NetworkTask implements ITask {
   node: Libp2p

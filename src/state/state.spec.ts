@@ -1,6 +1,6 @@
 import { Trie } from '@ethereumjs/trie'
 import crypto from 'crypto'
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 
 test('trie root test', async () => {
   const trie = new Trie({

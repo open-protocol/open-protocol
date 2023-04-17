@@ -1,5 +1,5 @@
 import { Account, SignedTransaction, UnsignedTransaction } from '.'
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 import { Keypair } from '../keypair'
 
 test('transaction encode test', () => {

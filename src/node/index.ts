@@ -12,7 +12,7 @@ import { TxPoolTask } from '../txpool'
 import { ConsensusTask } from '../consensus'
 import { UnsignedTransaction } from '../types'
 import { logger } from '../logger'
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 
 env.config()
 

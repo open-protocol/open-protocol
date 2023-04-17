@@ -17,12 +17,15 @@
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-    "testRegex": "\\.test\\.ts$",
+    "testRegex": "\\.spec\\.ts$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
       "js",
       "json"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!@open-protocol/codec)"
     ]
   },
   "devDependencies": {
@@ -49,6 +52,7 @@
     "@libp2p/tcp": "^6.0.8",
     "@multiformats/multiaddr": "^11.1.4",
     "@noble/ed25519": "^1.7.1",
+    "@open-protocol/codec": "github:open-protocol/codec",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "fastify": "^4.10.2",
