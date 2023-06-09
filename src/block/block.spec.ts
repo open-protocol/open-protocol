@@ -1,4 +1,4 @@
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 
 test('bigint calculate test', () => {
   const sum = Codec.encodeNumber((BigInt('0x00') + BigInt('0x01'))).toString('hex')

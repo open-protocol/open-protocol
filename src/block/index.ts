@@ -6,7 +6,7 @@ import { TxPoolTask } from '../txpool'
 import { Account, Block, BlockHeader, SignedTransaction, WasmCall } from '../types'
 import { WasmTask } from '../wasm'
 import crypto from 'crypto'
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 
 export class BlockTask implements ITask {
   manager: TaskManager

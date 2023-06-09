@@ -4,17 +4,20 @@ import * as ed from '@noble/ed25519'
 interface IKeypair {
   privateKey: string,
   publicKey: string,
+  address: string,
 }
 
 export class Keypair implements IKeypair {
-  constructor(public privateKey: string, public publicKey: string) { }
+  constructor(public privateKey: string, public publicKey: string, public address: string) { }
 
   public static new = async (): Promise<Keypair> => {
     const privateKey = ed.utils.randomPrivateKey()
     const publicKey = await ed.getPublicKey(privateKey)
+    const address = Buffer.from(publicKey).toString('base64url')
     return {
       privateKey: Buffer.from(privateKey).toString('hex'),
       publicKey: Buffer.from(publicKey).toString('hex'),
+      address
     }
   }
 

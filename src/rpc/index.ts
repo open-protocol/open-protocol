@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify'
-import { JSONRPCServer, JSONRPCRequest, SimpleJSONRPCMethod } from 'json-rpc-2.0'
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
+import { JSONRPCServer, JSONRPCRequest, SimpleJSONRPCMethod, JSONRPCResponse } from 'json-rpc-2.0'
 import { logger } from '../logger'
 import { ITask, TaskManager } from '../task'
 
@@ -13,19 +14,19 @@ export class RpcTask implements ITask {
   init = async (manager: TaskManager): Promise<void> => {
     this.manager = manager
 
-    this.fastify = Fastify()
+    this.fastify = Fastify().withTypeProvider<TypeBoxTypeProvider>()
     this.server = new JSONRPCServer()
 
     this.fastify.get('/health', async () => {
       return 'Node is alive.'
     })
 
-    this.fastify.post('/jsonrpc', async (request, reply) => {
-      const jsonrpcRequest = request.body as JSONRPCRequest
-      const jsonrpcResponse = await this.server.receive(jsonrpcRequest)
+    this.fastify.post<{ Body: JSONRPCRequest, Reply: JSONRPCResponse }>('/jsonrpc', async (request, reply) => {
+      const jsonrpcReq = request.body
+      const jsonrpcRes = await this.server.receive(jsonrpcReq)
 
-      if (jsonrpcResponse) {
-        reply.send(jsonrpcResponse)
+      if (jsonrpcRes) {
+        reply.send(jsonrpcRes)
       } else {
         reply.status(204)
         reply.send()

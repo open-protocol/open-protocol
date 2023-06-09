@@ -17,12 +17,15 @@
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-    "testRegex": "\\.test\\.ts$",
+    "testRegex": "\\.spec\\.ts$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
       "js",
       "json"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!@open-protocol/codec)"
     ]
   },
   "devDependencies": {
@@ -41,6 +44,7 @@
     "@chainsafe/libp2p-gossipsub": "^5.4.1",
     "@chainsafe/libp2p-noise": "^10.2.0",
     "@ethereumjs/trie": "^5.0.2",
+    "@fastify/type-provider-typebox": "^3.0.0",
     "@libp2p/bootstrap": "^5.0.2",
     "@libp2p/mplex": "^7.1.1",
     "@libp2p/peer-id": "^1.1.18",
@@ -48,6 +52,7 @@
     "@libp2p/tcp": "^6.0.8",
     "@multiformats/multiaddr": "^11.1.4",
     "@noble/ed25519": "^1.7.1",
+    "@open-protocol/codec": "github:open-protocol/codec",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "fastify": "^4.10.2",

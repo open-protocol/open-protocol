@@ -12,15 +12,15 @@ import { TxPoolTask } from '../txpool'
 import { ConsensusTask } from '../consensus'
 import { UnsignedTransaction } from '../types'
 import { logger } from '../logger'
-import { Codec } from '../codec'
+import { Codec } from '@open-protocol/codec'
 
 env.config()
 
 const program = new Command()
 program.command('key')
   .action(async () => {
-    const { privateKey, publicKey } = await Keypair.new()
-    const keypair = { privateKey, publicKey }
+    const { privateKey, publicKey, address } = await Keypair.new()
+    const keypair = { privateKey, publicKey, address }
     const keypairJson = JSON.stringify(keypair, null, '  ')
     console.log(keypairJson)
     fs.writeFileSync(`key-${new Date().getTime()}.json`, keypairJson)
