@@ -1,17 +1,17 @@
-import { ITask, TaskManager } from '../task'
+import { ITask, TaskManager } from "../task/index.js";
 
 export class ConsensusTask implements ITask {
-  manager: TaskManager
+  manager: TaskManager;
 
-  name = () => 'consensus'
+  name = () => "consensus";
 
-  init = async (manager: TaskManager): Promise<void> => { }
+  init = async (manager: TaskManager): Promise<void> => {};
 
-  start = async (): Promise<void> => { }
+  start = async (): Promise<void> => {};
 
-  stop = async (): Promise<void> => { }
+  stop = async (): Promise<void> => {};
 
   isMyTurn = async (): Promise<boolean> => {
-    return true
-  }
+    return true;
+  };
 }
