@@ -6,12 +6,12 @@ import { SignedTransaction } from "../types/index.js";
 
 export class TxPoolTask implements ITask {
   manager: TaskManager;
-  pending: Map<Buffer, Buffer>;
+  pending: Map<string, Buffer>;
 
   name = () => "txpool";
 
   init = async (manager: TaskManager): Promise<void> => {
-    this.pending = new Map<Buffer, Buffer>();
+    this.pending = new Map<string, Buffer>();
     this.manager = manager;
   };
 
@@ -19,8 +19,11 @@ export class TxPoolTask implements ITask {
     const rpc = this.manager.get<RpcTask>("rpc");
 
     rpc.addMethod(`${this.name()}_transact_raw`, async (params: string[]) => {
-      const tx = SignedTransaction.fromBuffer(Codec.encodeString(params[0]));
-      if (!this.pending.has(tx.toHash()) && (await tx.verify())) {
+      const tx = SignedTransaction.fromBuffer(Buffer.from(params[0], "hex"));
+      if (
+        !this.pending.has(tx.toHash().toString("hex")) &&
+        (await tx.verify())
+      ) {
         this.push(tx);
         const network = this.manager.get<NetworkTask>("network");
         if (network.hasConnection()) {
@@ -33,10 +36,10 @@ export class TxPoolTask implements ITask {
   stop = async (): Promise<void> => {};
 
   push = (tx: SignedTransaction) => {
-    this.pending.set(tx.toHash(), tx.toBuffer());
+    this.pending.set(tx.toHash().toString("hex"), tx.toBuffer());
   };
 
-  prune = (hashArray: Array<Buffer>) => {
+  prune = (hashArray: Array<string>) => {
     for (const hash of hashArray) {
       this.pending.delete(hash);
     }

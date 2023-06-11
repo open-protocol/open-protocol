@@ -10,13 +10,9 @@
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitReturns": true
   },
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ],
-  "include": [
-    "src/**/*"
-  ]
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "include": ["src/**/*"]
 }

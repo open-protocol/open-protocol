@@ -32,7 +32,7 @@ export class LevelDB {
     await this.leveldb_.batch(opStack);
   };
 
-  copy = () => {
+  copy = (): LevelDB => {
     return new LevelDB(this.leveldb_);
   };
 }

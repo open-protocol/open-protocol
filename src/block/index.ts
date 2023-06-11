@@ -12,7 +12,6 @@ import {
 } from "../types/index.js";
 import { WasmTask } from "../wasm/index.js";
 import crypto from "crypto";
-import { Codec } from "@open-protocol/codec";
 
 export class BlockTask implements ITask {
   manager: TaskManager;
@@ -31,16 +30,16 @@ export class BlockTask implements ITask {
 
   propose = async (): Promise<Block> => {
     this.previous = this.current.clone();
-    const txpool = this.manager.get<TxPoolTask>("txpool");
+    const txPool = this.manager.get<TxPoolTask>("txPool");
     const state = this.manager.get<StateTask>("state");
     const wasm = this.manager.get<WasmTask>("wasm");
 
-    const db = new Map<Buffer, Buffer>();
+    const db = new Map<string, Buffer>();
     const txs = new Array<string>();
-    const success = new Array<Buffer>();
-    const failed = new Array<Buffer>();
-    const invalid = new Array<Buffer>();
-    const txtrie = await Trie.create({
+    const success = new Array<string>();
+    const failed = new Array<string>();
+    const invalid = new Array<string>();
+    const txTrie = await Trie.create({
       useRootPersistence: true,
       useKeyHashing: true,
       useKeyHashingFunction: (key: Uint8Array) => {
@@ -49,7 +48,7 @@ export class BlockTask implements ITask {
     });
 
     let txCount = 0;
-    for (const [hash, tx] of txpool.pending) {
+    for (const [hash, tx] of txPool.pending) {
       if (txCount > 100) {
         break;
       }
@@ -58,8 +57,9 @@ export class BlockTask implements ITask {
         if (!(await decodedTx.verify())) {
           throw new Error("Invalid transaction.");
         }
-        const fromBuffer = Codec.encodeString(decodedTx.from);
-        const fromValue = db.get(fromBuffer) ?? (await state.get(fromBuffer));
+        const fromValue =
+          db.get(decodedTx.from) ??
+          (await state.get(Buffer.from(decodedTx.from, "base64url")));
         if (!fromValue) {
           continue;
         }
@@ -67,71 +67,66 @@ export class BlockTask implements ITask {
         if (fromAccount.nonce !== decodedTx.nonce) {
           continue;
         }
-        if (
-          BigInt(`0x${fromAccount.balance}`) - BigInt(`0x${decodedTx.value}`) <
-          0
-        ) {
+        if (BigInt(fromAccount.balance) - BigInt(decodedTx.value) < 0) {
           throw new Error("From does not have enough value.");
         }
-        const toBuffer = Codec.encodeString(decodedTx.to);
-        const toValue = db.get(toBuffer) ?? (await state.get(toBuffer));
-        const toAccount = toValue
-          ? Account.fromBuffer(toValue)
-          : Account.new(decodedTx.to);
-        if (toAccount.code !== "00" && decodedTx.input !== "00") {
+        const toValue =
+          db.get(decodedTx.to) ??
+          (await state.get(Buffer.from(decodedTx.to, "base64url")));
+        const toAccount = toValue ? Account.fromBuffer(toValue) : Account.new();
+        if (toAccount.code && decodedTx.input) {
           WasmCall.fromBuffer(
             decodedTx.to,
-            Codec.encodeString(decodedTx.input)
+            Buffer.from(decodedTx.input, "utf8")
           );
         }
 
-        const tempdb = new Map<Buffer, Buffer>();
-        fromAccount.balance = Codec.encodeNumber(
-          BigInt(`0x${fromAccount.balance}`) - BigInt(`0x${decodedTx.value}`)
-        ).toString("hex");
-        toAccount.balance = Codec.encodeNumber(
-          BigInt(`0x${toAccount.balance}`) + BigInt(`0x${decodedTx.value}`)
-        ).toString("hex");
+        const tempdb = new Map<string, Buffer>();
+        fromAccount.balance = (
+          BigInt(fromAccount.balance) - BigInt(decodedTx.value)
+        ).toString();
+        toAccount.balance = (
+          BigInt(toAccount.balance) + BigInt(decodedTx.value)
+        ).toString();
         fromAccount.nonce++;
-        tempdb.set(fromBuffer, fromAccount.toBuffer());
-        tempdb.set(toBuffer, toAccount.toBuffer());
+        tempdb.set(decodedTx.to, toAccount.toBuffer());
         try {
-          if (toAccount.code !== "00" && decodedTx.input !== "00") {
+          if (toAccount.code && decodedTx.input) {
             const call = WasmCall.fromBuffer(
               decodedTx.to,
-              Codec.encodeString(decodedTx.input)
+              Buffer.from(decodedTx.input, "utf8")
             );
-            await wasm.call(tempdb, fromAccount.publicKey, call);
+            await wasm.call(tempdb, decodedTx.from, call);
           }
-          db.set(fromBuffer, fromAccount.toBuffer());
-          db.set(toBuffer, toAccount.toBuffer());
+          db.set(decodedTx.from, fromAccount.toBuffer());
+          db.set(decodedTx.to, toAccount.toBuffer());
           success.push(hash);
         } catch (e: any) {
           failed.push(hash);
         }
-        txs.push(hash.toString("hex"));
-        await txtrie.put(hash, tx);
+        txs.push(hash);
+        await txTrie.put(Buffer.from(hash, "hex"), tx);
         txCount++;
       } catch (e: any) {
-        logger.debug(`${e.toString()} hash=${hash.toString("hex")}`);
+        logger.debug(`${e.toString()} hash=${hash}`);
         invalid.push(hash);
       }
     }
 
-    txpool.prune(success);
-    txpool.prune(failed);
-    txpool.prune(invalid);
+    txPool.prune(success);
+    txPool.prune(failed);
+    txPool.prune(invalid);
 
     await state.apply(db);
-    const stateroot = state.root().toString("hex");
-    const txroot = txtrie.root().toString("hex");
+    const stateRoot = state.root().toString("hex");
+    const txRoot = txTrie.root().toString("hex");
 
     const number = this.previous.header.number + 1;
     const header = BlockHeader.new(
       number,
       this.previous.header.hash,
-      txroot,
-      stateroot
+      txRoot,
+      stateRoot
     );
     const block = Block.new(header, txs);
 

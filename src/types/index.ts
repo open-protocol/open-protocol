@@ -145,87 +145,67 @@ export class SignedTransaction implements ISignedTransaction {
   public verify = async (): Promise<boolean> => {
     const unsignedTx = UnsignedTransaction.fromSignedTx(this);
     return await Keypair.verify(
-      Codec.encodeString(this.signature),
+      Buffer.from(this.signature, "hex"),
       unsignedTx.toBuffer(),
-      Codec.encodeString(this.from)
+      Buffer.from(this.from, "base64url")
     );
   };
 }
 
-export type MemoryKey = string | number | bigint;
-export type MemoryValue =
-  | string
-  | number
-  | bigint
-  | MemoryValue[]
-  | Map<MemoryKey, MemoryValue>;
-
 interface IAccount {
-  publicKey: string;
   balance: string;
   nonce: number;
   code: string;
-  memory: Map<MemoryKey, MemoryValue>;
+  memory: Map<string, Buffer>;
 }
 
 export class Account implements IAccount {
   constructor(
-    public publicKey: string,
     public balance: string,
     public nonce: number,
-    public code: string,
-    public memory: Map<MemoryKey, MemoryValue>
+    public code: string | null | undefined,
+    public memory: Map<string, Buffer>
   ) {}
 
-  public static new = (publicKey: string): Account => {
-    if (publicKey !== "64") {
-      throw new Error("Invalid public key.");
-    }
-    return new Account(
-      publicKey,
-      "00",
-      0,
-      "00",
-      new Map<MemoryKey, MemoryValue>()
-    );
+  public static new = (): Account => {
+    return new Account("0", 0, null, new Map<string, Buffer>());
   };
 
   public static fromBuffer = (buffer: Buffer): Account => {
     const values = Codec.decode(buffer);
     if (
       typeof values[0] !== "string" ||
-      typeof values[1] !== "string" ||
-      typeof values[2] !== "number" ||
-      typeof values[3] !== "string" ||
-      !(values[4] instanceof Map)
+      typeof values[1] !== "number" ||
+      typeof values[2] !== "string" ||
+      typeof values[2] !== "undefined" ||
+      !(values[3] instanceof Map)
     ) {
       throw new Error("Failed to encode buffer.");
     }
-    return new Account(values[0], values[1], values[2], values[3], values[4]);
+    return new Account(
+      values[0],
+      values[1],
+      values[2],
+      values[3] as Map<string, Buffer>
+    );
   };
 
   public toBuffer = (): Buffer => {
-    return Codec.encode([
-      this.publicKey,
-      this.balance,
-      this.nonce,
-      this.code,
-      this.memory,
-    ]);
+    return Codec.encode([this.balance, this.nonce, this.code, this.memory]);
   };
 }
 
 interface IWasmCall {
   address: string;
   method: string;
-  params: string;
+  input: string;
 }
 
 export class WasmCall implements IWasmCall {
   constructor(
     public address: string,
     public method: string,
-    public params: string
+    public input: string
   ) {}
 
   public static fromBuffer = (address: string, buffer: Buffer): WasmCall => {

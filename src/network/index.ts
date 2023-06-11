@@ -25,10 +25,10 @@ export class NetworkTask implements ITask {
     this.topic = "opp";
 
     const privateKey = Uint8Array.from(
-      Codec.encodeString(process.env.PEER_PRIVATE)
+      Buffer.from(process.env.PEER_PRIVATE, "hex")
     );
     const publicKey = Uint8Array.from(
-      Codec.encodeString(process.env.PEER_PUBLIC)
+      Buffer.from(process.env.PEER_PUBLIC, "hex")
     );
     this.peerId = await peerIdFromKeys(publicKey, privateKey);
 
@@ -74,7 +74,7 @@ export class NetworkTask implements ITask {
         if (type === 0) {
           const tx = SignedTransaction.fromBuffer(Buffer.from(data.slice(1)));
           const txpool = this.manager.get<TxPoolTask>("txpool");
-          if (!txpool.pending.has(tx.toHash())) {
+          if (!txpool.pending.has(tx.toHash().toString("hex"))) {
             txpool.push(tx);
           }
         } else {

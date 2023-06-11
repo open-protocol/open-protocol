@@ -33,8 +33,8 @@ program
     const loaded = fs.readFileSync(options.filePath, "utf8");
     const keypair = JSON.parse(loaded);
     if (keypair.privateKey) {
-      const privateKey = Codec.encodeString(keypair.privateKey);
-      const mesasge = Codec.encodeString(options.message);
+      const privateKey = Buffer.from(keypair.privateKey, "hex");
+      const mesasge = Buffer.from(options.message, "hex");
       const signature = (await Keypair.sign(privateKey, mesasge)).toString(
         "hex"
       );

@@ -53,6 +53,7 @@
     "@multiformats/multiaddr": "^11.1.4",
     "@noble/ed25519": "^1.7.1",
     "@open-protocol/codec": "github:open-protocol/codec",
+    "@open-protocol/wasm": "github:open-protocol/wasm",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "fastify": "^4.10.2",

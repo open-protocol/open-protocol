@@ -16,7 +16,7 @@ export class StateTask implements ITask {
       db: new LevelDB(new Level("./db")),
       useRootPersistence: true,
       useKeyHashing: true,
-      useKeyHashingFunction: (key: Uint8Array) => {
+      useKeyHashingFunction: (key: Uint8Array): Buffer => {
         return crypto.createHash("sha256").update(key).digest();
       },
     });
@@ -38,10 +38,10 @@ export class StateTask implements ITask {
     await this.trie.del(key);
   };
 
-  apply = async (db: Map<Buffer, Buffer>) => {
+  apply = async (db: Map<string, Buffer>) => {
     this.trie.checkpoint();
     for (const [key, value] of db) {
-      await this.trie.put(key, value);
+      await this.trie.put(Buffer.from(key, "base64url"), value);
     }
   };
 
